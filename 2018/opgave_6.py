@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt
+from copy import deepcopy
+import operator
+
 """
 Nummering van de vierkantjes is als volgt, diagnonaal van linksonder naar rechtsboven
 - bovenste deel gevuld is nummer 1
@@ -73,7 +77,6 @@ def store_pattern(x, y):
     return pattern
 
 
-import matplotlib.pyplot as plt
 plt.imshow(MATRIX, interpolation="nearest", cmap='hot')
 plt.show()
 
@@ -107,30 +110,32 @@ def words_split_4s():
 
     return split_word_dict
 
+
 def words_split_meta_data():
-    dict = words_split_4s()
-    for word in dict.keys():
-        print(f"Seq: {word}, aantal: {dict[word]} len: {len(word)/3}")
+    dict_split = words_split_4s()
+    for word in dict_split.keys():
+        print(f"Seq: {word}, number: {dict_split[word]} len: {len(word)/3}")
+
 
 def all_patterns_flat():
     h = flatten_matrix_h()
     v = flatten_matrix_v()
-    compl_dict_h = {}
-    compl_dict_v = {}
+    complete_dict_h = {}
+    complete_dict_v = {}
     for l in range(3, 11):
         dict_l = {}
         for b in range((len(h) // l) - 1):
             w = h[b * l: (b + 1) * l]
             dict_l = add_pattern(dict_l, str(w))
-        compl_dict_h[l] = dict_l
+        complete_dict_h[l] = dict_l
     for l in range(3, 11):
         dict_l = {}
         for b in range((len(v) // l) - 1):
             w = v[b * l: (b + 1) * l]
             dict_l = add_pattern(dict_l, str(w))
-        compl_dict_v[l] = dict_l
+        complete_dict_v[l] = dict_l
 
-    return compl_dict_h, compl_dict_v
+    return complete_dict_h, complete_dict_v
 
 
 # pattern_5_1 = store_pattern(5, 1)
@@ -150,18 +155,42 @@ def all_patterns_flat():
 # print(len(pattern_11_3))
 # print(len(pattern_11_7))
 
+class ThreeSolution:
 
-def repl_wrapper(matrix, pattern, char):
-    for i in range(len(matrix)):
-        if matrix[i] == pattern:
-            matrix[i] = char
-    return matrix
+    def __init__(self):
+        self.matrix_flat = flatten_matrix_h()
+        self.matrix = self.matrix_in_3s()
+        self.list_patterns = self.all_patterns_flat()
+        self.solution_matrix = []
+        self.reset()
 
+    def reset(self):
+        self.solution_matrix = deepcopy(self.matrix_in_3s())
 
-def matrix_in_3s():
-    matrix = flatten_matrix_h()
-    length = 3
-    repl_matrix = []
-    for s in range(len(matrix) // 3):
-        repl_matrix.append(matrix[s * length: (s + 1) * length])
-    return repl_matrix
+    def replace_wrapper(self, pattern, char):
+        for i in range(len(self.solution_matrix)):
+            if self.solution_matrix[i] == pattern:
+                self.solution_matrix[i] = char
+
+    def matrix_in_3s(self):
+        length = 3
+        replace_matrix = []
+        for s in range(len(self.matrix_flat) // 3):
+            replace_matrix.append(self.matrix_flat[s * length: (s + 1) * length])
+        return replace_matrix
+
+    def all_patterns_flat(self):
+        dict_list = {}
+        for b in range((len(self.matrix_flat) // 3) - 1):
+            w = self.matrix_flat[b * 3: (b + 1) * 3]
+            dict_list = add_pattern(dict_list, str(w))
+        return dict_list
+
+    def sorted_list(self):
+        sorted_list = sorted(self.list_patterns.items(), key=operator.itemgetter(1), reverse=True)
+        return sorted_list
+
+    def print_matrix(self):
+        row_length = 10
+        for i in range(len(self.solution_matrix) // row_length + 1):
+            print(self.solution_matrix[i * row_length: (i + 1) * row_length])
